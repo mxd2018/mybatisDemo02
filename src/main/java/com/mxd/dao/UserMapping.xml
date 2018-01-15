@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--这里映射的是接口，namespace是接口的权限定名 ，权限定名是用点连接的，文件路径才用/ -->
+<mapper namespace="com.mxd.dao.IUserDao">
+	
+	<!--注意这里的id必须和接口中方法的名称相同  -->
+	<select id="selectById" parameterType="int" resultType="User">
+		select * from user where id = #{id}
+    </select>
+    
+    <select id="findAllUser" resultType="User">
+    	select * from user
+    </select>
+    
+   	<!--这种方式需要数据库的主键设置为自增  -->
+   	<insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+    	insert into user(name,password) values(#{name},#{password})
+    </insert>
+    
+    
+    <delete id="deleteUser" parameterType="int">
+    	delete from user where id = #{id} 
+    </delete>
+    
+    <update id="updateUser"  parameterType="User">
+    	update user set name=#{name},password=#{password} where id=#{id}
+    </update>
+    
+    <select id="findUserLike" parameterType="User" resultType="User">
+    	select * from user where name like '%${name}%'
+    </select>
+    
+    <select id="selectUserByPage" resultType="User">
+    	select * from user limit #{firstpage},#{pagesize}
+    </select>
+</mapper>
