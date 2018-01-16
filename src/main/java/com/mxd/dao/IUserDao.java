@@ -6,11 +6,30 @@ import java.util.Map;
 import com.mxd.pojo.po.User;
 
 public interface IUserDao {
+	//join关联查询，左外链接查询
+	List<User> findByJoin();
+	
+	List<User> findByJoin2();
+	
+	//select关联查询
+	List<User> findBySelect();
+	
+	List<User> findByselect2();
+	
 	//查询单个对象
 	User selectById(Integer id);
 	
+	//一级缓存测试
+	User selectByCache(Integer id);
+	
+	//二级缓存测试
+	User selectByCache2(Integer id);
+	
 	//获得所有对象
 	List<User> findAllUser();
+	
+	//查询地址为addr1的user对象，通过外键查询
+	User findUserByAddr(User user);
 	
 	//添加对象
 	void insertUser(User user);

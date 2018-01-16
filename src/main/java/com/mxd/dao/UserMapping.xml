@@ -5,34 +5,172 @@
 <!--这里映射的是接口，namespace是接口的权限定名 ，权限定名是用点连接的，文件路径才用/ -->
 <mapper namespace="com.mxd.dao.IUserDao">
 	
-	<!--注意这里的id必须和接口中方法的名称相同  -->
-	<select id="selectById" parameterType="int" resultType="User">
-		select * from user where id = #{id}
+	<!-- 二级缓存是mapper级别缓存，根据namespace划分，
+		   被本Mapper文件中的所有select共享 
+		 注意：拷贝EhcacheCache文件的完全限定名到此后，后面要删掉.class后缀
+	-->
+	<cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+
+	
+	<!-- 
+		这个标签的作用可以替换掉sql语句中的*，
+		别名可以解决数据库字段名和pojo类属性名不一致的问题 ，只要别名和属性名一致即可
+		resultMap标签中的property和column属性也可解决这个问题
+	-->
+	<sql id="userColumns">
+		id as id,
+		name as name,
+		password as password
+	</sql>
+	
+	<!-- 
+		这里的property代表的是pojo类中的属性，column是数据库的字段名
+		resultMap标签将属性和自断建立起了映射关系，因此属性和字段名可以不一样
+	 -->
+	<resultMap type="User" id="userResultMap">
+		<!-- 表示主键, 如果在查询语句中使用了<sql>标签并设置了别名，那么column就需要使用别名 -->
+		<id property="id" column="ID"/>
+		<result property="name" column="NAME"/>
+		<result property="password" column="PASSWORD"/>
+	</resultMap>
+	
+	<resultMap type="User" id="userResultMap2" extends="userResultMap">
+		<!--
+			这部分与userResultMap中的内容重复，可以使用extends属性继承
+			<id property="id" column="ID"/>
+			<result property="name" column="NAME"/>
+			<result property="password" column="PASSWORD"/> 
+		-->
+		
+		<!-- 
+			关联单个pojo,如果不设置当使用关联查询，查询出来的address信息封装不进user对象 
+		  	 注意：1.如果两个表中有重复的字段名称，需要使用别名
+			 	2.javaType代表的是addr属性的类型，需要使用全限定名，但可以在mybatis.xml文件中设置别名
+			 	3.join关联不能进行懒加载，只有select关联时才能懒加载
+		-->
+		<association property="addr" column="UID" javaType="com.mxd.pojo.po.Address">
+			<id property="id" column="AID"/>
+			<result property="name" column="ADDR"/>
+		</association>
+		<!-- 关联集合 ，ofType代表集合中的元素类型，column代表的外键-->
+		<collection property="orders" column="UID" ofType="com.mxd.pojo.po.Order">
+			<id property="oid" column="OID"/>
+			<result property="oname" column="ONAME"/>
+		</collection>	
+	</resultMap>
+	
+	<!-- 使用select方式进行关联查询，只有select关联查询才能进行懒加载 -->
+	<resultMap type="User" id="userResultMap3" extends="userResultMap">
+		<!-- 注意：1.这里的column不再是外键，而是user的id，
+			   	         因为此时是通过子查询的方式，需要先查询出user的id再传到select属性所代表的映射文件中去查询 
+			   	 2.这里不需要写javaType或ofType 
+		-->
+		<association property="addr" column="ID"  select="com.mxd.dao.IAddressDao.selectByFK" />
+		
+		<collection property="orders" column="ID"  select="com.mxd.dao.IOrderDao.selectByFK" />	
+	</resultMap>
+	
+	
+	
+	
+	
+	<!-- join关联查询，关联单个pojo -->
+	<select id="findByJoin" resultMap="userResultMap2">
+    	<!-- SELECT * FROM USER LEFT JOIN address ON user.id=address.uid 
+    		注意：以上方式两张表的id字段名相同，在将数据封装进User对象时，column属性不知道是哪张表的id
+    		因此会成user表的id值，所以放表的字段名相同时一定要取别名
+    	-->
+    	SELECT user.*,address.id as aid,address.addr FROM USER LEFT JOIN address ON user.id=address.uid
+    </select>
+    <!-- join关联查询，关联集合 -->
+    <select id="findByJoin2" resultMap="userResultMap2">
+    	SELECT * FROM USER LEFT JOIN orders ON user.id=orders.uid
+    </select>
+    <!-- select关联查询，关联单个pojo -->
+    <select id="findBySelect" resultMap="userResultMap3">
+    	SELECT * FROM USER 
+    </select>
+     <!-- select关联查询，关联集合 -->
+     <select id="findByselect2" resultMap="userResultMap3">
+    	SELECT * FROM USER 
     </select>
     
-    <select id="findAllUser" resultType="User">
+    
+	<!--根据id查询user对象
+		include标签包含的是sql标签中的内容，替代了*
+		注意这里的id必须和接口中方法的名称相同 
+	 -->
+	<select id="selectById" parameterType="int" resultType="User">
+		select 
+			<include refid="userColumns"></include>
+		from user where id = #{id}
+    </select>
+    
+    <!-- 缓存测试1 -->
+    <select id="selectByCache" parameterType="int" resultType="User">
+		select 
+			<include refid="userColumns"></include>
+		from user where id = #{id}
+    </select>
+     <!-- 缓存测试2 -->
+    <select id="selectByCache2" parameterType="int" resultType="User">
+		select 
+			<include refid="userColumns"></include>
+		from user where id = #{id}
+    </select>
+    
+    
+    <!-- 注意：resultMap和resultType属性不能同时出现
+    		resultMap值是自己定义的resultMap标签的id
+      -->
+    <select id="findAllUser" resultMap="userResultMap">
     	select * from user
     </select>
     
-   	<!--这种方式需要数据库的主键设置为自增  -->
-   	<insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
-    	insert into user(name,password) values(#{name},#{password})
-    </insert>
+    <select id="findUserByAddr" resultType="User" parameterType="User">
+    	<!--查询地址为addr1的user对象，通过外键查询  -->
+    	select * from user where id=(select uid from address where addr=#{addr.name})
+    </select>
+    
+   	<!--方式一
+   		这种方式需要在数据库的主键设置为自增 
+   		设置之后useGeneratedKeys="true" keyProperty="id"返回新增的主键值封装到User的id属性中
+   		在插入数据之后同时也可以拿到新增的id值
+   	 -->
+   	<!-- 
+	   	<insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+	    	insert into user(name,password) values(#{name},#{password})
+	    </insert> 
+    -->
+    
+    <!--获取主键方式二  -->
+    <insert id="insertUser">
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+			<!-- 需要起别名id，不然列名last_insert_id不能绑定到对象中的属性id -->
+			select last_insert_id() as id
+		</selectKey>
+  			insert into user (name,password)
+  			values (#{name},#{password})
+	</insert>
     
     
     <delete id="deleteUser" parameterType="int">
+    	<!-- 删除信息 -->
     	delete from user where id = #{id} 
     </delete>
     
     <update id="updateUser"  parameterType="User">
+    	<!-- 修改信息 -->
     	update user set name=#{name},password=#{password} where id=#{id}
     </update>
     
     <select id="findUserLike" parameterType="User" resultType="User">
+    	<!-- 模糊查询，该方式存在sql注入的安全问题  -->
     	select * from user where name like '%${name}%'
     </select>
     
     <select id="selectUserByPage" resultType="User">
+    	<!-- 分页查询  -->
     	select * from user limit #{firstpage},#{pagesize}
     </select>
 </mapper>
