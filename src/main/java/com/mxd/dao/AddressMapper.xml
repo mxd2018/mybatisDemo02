@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mxd.dao.IAddressDao">
+	<sql id="AddressColumn">
+		id as id,
+		addr as name
+	</sql>
+	
+	<!-- /**
+	 * select关联查询
+	 * 注意：因为在设置Address类时name属性与数据库表中addr字段没有匹配
+	 * 	         因此在AddressMapper文件中要使用别名的方式匹配字段与属性
+	 * 上文中的getName()可行是因为在resultMap标签中，配置了property与column属性
+	 */ -->
+	<select id="selectByFK" resultType="com.mxd.pojo.po.Address" parameterType="int">
+		select 
+		<include refid="AddressColumn"/>
+		from address where uid = #{id}		
+	</select>
+</mapper>

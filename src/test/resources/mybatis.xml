@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<settings>
+		<setting name="logImpl" value="LOG4J"/>
+<!-- 	懒加载总开关，
+		在UserMapping.xml中的<association>标签中应该还有个fetchType="lazy|fasle"的属性
+		该属性可以覆盖总开关，当其他的select支持懒加载时，可以独特化将当前select的懒加载关闭
+-->
+		<setting name="lazyLoadingEnabled" value="true"/>
+<!-- 
+		如果A关联B,A关联C,查询A时,把B也关联出来,C要不要关联出来
+		例如：在迫切懒加载关闭的情况下
+		B.get()的时候，B会被关联出来，但C不会被关联
+		C.get()的时候C会被关联出来，B不会被关联出来
+-->
+		<setting name="aggressiveLazyLoading" value="false"/>
+		
+<!-- 	二级缓存开关
+		Mybatis开启缓存还要在Mapper文件中加一行<cache type="第三方缓存插件"/>
+ -->
+		<setting name="cacheEnabled" value="true"/>
+		
+	</settings>
+	
+	<typeAliases>
+		<typeAlias alias="User" type="com.mxd.pojo.po.User" />
+	</typeAliases>
+	
+	<environments default="development">
+	    <environment id="development">
+		<transactionManager type="JDBC" />
+			<dataSource type="POOLED">  
+                <property name="driver" value="com.mysql.jdbc.Driver" />
+			    <property name="url" value="jdbc:mysql:///mybatis01" />
+			    <property name="username" value="root" />
+			    <property name="password" value="123" />
+            </dataSource>
+		</environment>
+	</environments>
+
+	<mappers>
+<!--
+	     这里的资源是xml文件，如果不写xml就是个class = 接口全限定名   的方式 ,
+	     该方式接口和xml文件要同包放置因为该接口要找其对应的映射文件
+-->
+	     <mapper resource="com/mxd/dao/UserMapping.xml" />
+	     <mapper resource="com/mxd/dao/AddressMapper.xml" />
+	     <mapper resource="com/mxd/dao/OrderMapper.xml" />
+	</mappers>
+</configuration> 
