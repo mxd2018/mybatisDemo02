@@ -38,10 +38,16 @@
         
     </bean>  
 	
-	<bean id="userDao" class="org.mybatis.spring.mapper.MapperFactoryBean">  
+	<!-- <bean id="userDao" class="org.mybatis.spring.mapper.MapperFactoryBean">  
     	<property name="mapperInterface" value="com.mxd.dao.IUserDao"></property>  
     	<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>  
-	</bean>
+	</bean> -->
+	<!-- mapper扫描器 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--扫描mapper包中的接口-->
+         <property name="basePackage" value="com.mxd.dao"></property>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
 	
 </beans>
 

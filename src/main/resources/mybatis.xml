@@ -24,10 +24,33 @@
 	</environments>
 
 	<mappers>
-	     <!--这里的资源是xml文件，如果不写xml就是个class = 接口全限定名   的方式 ,
-	     	该方式接口和xml文件要同包放置因为该接口要找其对应的映射文件 -->
+	   <!--
+	            注意1：这里映射关系的配置有三种方式，实现映射关系的流程不同
+	     	1.resource = xml文件 ：
+	     		mybatis初始化时，先会去找到xml的映射文件，再通过映射文件的namespace映射到接口，
+	     		因此此时接口名和映射文件名可以不同，且存放的包即文件位置也可以不同
+	     	
+	     	2.class = 接口全限定名 ：
+	     		mybatis初始化时会先去找到接口，再去自动解析  文件名相同xml映射文件，
+	     		因此此时如果映射文件不在接口所在包中，它就找不到映射文件，也就无法建立起映射关系
+	     	
+	     	3.pakege = 接口所在包 ：
+	     		该方式首先找的也是接口，因为接口肯定不止一个，所以使用pakege后就能找到该指定包下的所有接口，再自动解析所有接口的映射文件，
+	     		因此此方式也需要相同的文件名，且同包放置
+			
+		注意2：当整合SSM框架时，在spring框架中可以创建org.mybatis.spring.mapper.MapperScannerConfigurer这个类的实例
+				该类对象是Mapper类的代理对象，
+				可以使用该类中的basePackage属性，通过value=接口所在包，实现mybatis中pakege扫描接口后建立映射关系的功能，
+				并且使用该类的sqlSessionFactoryBeanName属性，通过value=sqlSessionFactory生成指定包下所有接口的代理实现类
+				因此当Spring框架中配置了MapperScannerConfigurer这个bean，此处mybatis文件中就不需要配置mapper了
+				
+		注意3：因为在spring中配置还是通过自动扫描接口、解析映射文件的方式，因此接口名和映射文件名还是要相同
+		-->
+	     <!--  <mapper class="com.mxd.dao.IUserDao"/> -->
+	     <!-- <package name="com.mxd.dao"/> --> 
 	     <mapper resource="com/mxd/dao/UserMapping.xml" />
 	     <mapper resource="com/mxd/dao/AddressMapper.xml" />
 	     <mapper resource="com/mxd/dao/OrderMapper.xml" />
 	</mappers>
+	
 </configuration> 

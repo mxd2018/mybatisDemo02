@@ -46,6 +46,8 @@
 	     这里的资源是xml文件，如果不写xml就是个class = 接口全限定名   的方式 ,
 	     该方式接口和xml文件要同包放置因为该接口要找其对应的映射文件
 -->
+		<!-- <mapper class="com.mxd.dao.IUserDao"/> -->
+		
 	     <mapper resource="com/mxd/dao/UserMapping.xml" />
 	     <mapper resource="com/mxd/dao/AddressMapper.xml" />
 	     <mapper resource="com/mxd/dao/OrderMapper.xml" />

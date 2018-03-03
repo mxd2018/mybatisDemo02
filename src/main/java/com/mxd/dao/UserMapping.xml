@@ -25,7 +25,7 @@
 	
 	<!-- 
 		这里的property代表的是pojo类中的属性，column是数据库的字段名
-		resultMap标签将属性和自断建立起了映射关系，因此属性和字段名可以不一样
+		resultMap标签将属性和字段建立起了映射关系，因此属性和字段名可以不一样
 	 -->
 	<resultMap type="User" id="userResultMap">
 		<!-- 表示主键, 如果在查询语句中使用了<sql>标签并设置了别名，那么column就需要使用别名 -->
@@ -64,6 +64,8 @@
 		<!-- 注意：1.这里的column不再是外键，而是user的id，
 			   	         因为此时是通过子查询的方式，需要先查询出user的id再传到select属性所代表的映射文件中去查询 
 			   	 2.这里不需要写javaType或ofType 
+			   	 3.这里的column指的都是数据库中的字段，property才是实体类的属性
+				实体类中都不需要写关于外键的属性，如果要往数据库中插入外键值，就在from表单的name属性写 对象.值（外键值）即可，后台实体类的对象属性能接受到这个值
 		-->
 		<association property="addr" column="ID"  select="com.mxd.dao.IAddressDao.selectByFK" />
 		

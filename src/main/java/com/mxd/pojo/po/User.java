@@ -8,8 +8,7 @@ public class User {
 	private String name;
 	private String password;
 	private Address addr;
-	private List<Order> orders;
- 	
+ 	private List<Order> orders;
 	
 	public Integer getId() {
 		return id;
@@ -30,28 +29,18 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
 	public Address getAddr() {
 		return addr;
 	}
 	public void setAddr(Address addr) {
 		this.addr = addr;
 	}
-	
-	
 	public List<Order> getOrders() {
 		return orders;
 	}
 	public void setOrders(List<Order> orders) {
 		this.orders = orders;
 	}
-	@Override
-	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", password=" + password + ", addr=" + addr + ", orders=" + orders
-				+ "]";
-	}
-	
-	
 	
 	
 }
